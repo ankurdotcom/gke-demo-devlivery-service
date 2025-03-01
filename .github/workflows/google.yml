@@ -9,6 +9,7 @@
 #    - Artifact Registry (artifactregistry.googleapis.com)
 #    - Google Kubernetes Engine (container.googleapis.com)
 #    - IAM Credentials API (iamcredentials.googleapis.com)
+# gcloud services enable artifactregistry  container iamcredentials
 #
 #    You can learn more about enabling APIs at
 #    https://support.google.com/googleapi/answer/6158841.
@@ -36,17 +37,17 @@ name: 'Build and Deploy to GKE'
 on:
   push:
     branches:
-      - '"master"'
+      - 'master'
 
 env:
-  PROJECT_ID: 'my-project' # TODO: update to your Google Cloud project ID
+  PROJECT_ID: 'gke-demo-451811' # TODO: update to your Google Cloud project ID
   GAR_LOCATION: 'us-central1' # TODO: update to your region
   GKE_CLUSTER: 'cluster-1' # TODO: update to your cluster name
   GKE_ZONE: 'us-central1-c' # TODO: update to your cluster zone
-  DEPLOYMENT_NAME: 'gke-test' # TODO: update to your deployment name
-  REPOSITORY: 'samples' # TODO: update to your Artifact Registry docker repository name
-  IMAGE: 'static-site'
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider' # TODO: update to your workload identity provider
+  DEPLOYMENT_NAME: 'gke-demo-delivery-service-deploymen' # TODO: update to your deployment name
+  REPOSITORY: 'gke-demo-order' # TODO: update to your Artifact Registry docker repository name
+  IMAGE: 'delivery-service-image'
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/818815210796/locations/global/workloadIdentityPools/github-pool/providers/delivery-service-provider' # TODO: update to your workload identity provider
 
 jobs:
   setup-build-publish-deploy:
@@ -85,7 +86,13 @@ jobs:
         uses: 'google-github-actions/get-gke-credentials@6051de21ad50fbb1767bc93c11357a49082ad116' # google-github-actions/get-gke-credentials@v2
         with:
           cluster_name: '${{ env.GKE_CLUSTER }}'
-          location: '${{ env.GKE_ZONE }}'
+          location: '${{ env.GAR_LOCATION }}'
+
+      # Build the JAR file
+      - name: 'Build JAR'
+        run: |-
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
 
       # Build the Docker image
       - name: 'Build and push Docker container'
@@ -103,14 +110,22 @@ jobs:
       # Set up kustomize
       - name: 'Set up Kustomize'
         run: |-
-          curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz
+          curl -LO kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz
+          tar -xvzf kustomize_v5.4.3_linux_amd64.tar.gz
           chmod u+x ./kustomize
 
       # Deploy the Docker image to the GKE cluster
       - name: 'Deploy to GKE'
         run: |-
           # replacing the image name in the k8s template
+          # Set the image name dynamically
           ./kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA
+          
+          # Build and apply the manifests
           ./kustomize build . | kubectl apply -f -
+          
+          # Wait for rollout to complete
           kubectl rollout status deployment/$DEPLOYMENT_NAME
+          
+          # Get the service details
           kubectl get services -o wide
