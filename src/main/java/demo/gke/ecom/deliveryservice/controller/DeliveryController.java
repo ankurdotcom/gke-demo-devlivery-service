@@ -1,4 +1,4 @@
-package demo.gke.ecom.devliveryservice.controller;
+package demo.gke.ecom.deliveryservice.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

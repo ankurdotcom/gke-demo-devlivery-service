@@ -1,4 +1,4 @@
-package demo.gke.ecom.devliveryservice;
+package demo.gke.ecom.deliveryservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package demo.gke.ecom.devliveryservice;
+package demo.gke.ecom.deliveryservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

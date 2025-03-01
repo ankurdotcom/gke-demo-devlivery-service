@@ -11,7 +11,7 @@
 	<groupId>demo.gke.ecom</groupId>
 	<artifactId>devliveryservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>devliveryservice</name>
+	<name>deliveryservice</name>
 	<description>Demo GKE project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -60,6 +60,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>app</finalName>
 	</build>
 
 </project>
