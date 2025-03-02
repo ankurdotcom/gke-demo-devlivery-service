@@ -15,9 +15,9 @@ public class DeliveryController {
     }
 
 
-    @GetMapping("/test")
-    public ResponseEntity<String> testMethod() {
-        return ResponseEntity.ok().body("Delivery-service");
+    @GetMapping("/test/{count}")
+    public ResponseEntity<String> testMethod(@Requestparam String  count) {
+        return ResponseEntity.ok().body("Delivery-service:"+count);
     }
 
 
