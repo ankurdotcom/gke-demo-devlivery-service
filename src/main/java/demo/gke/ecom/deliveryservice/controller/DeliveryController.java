@@ -16,7 +16,7 @@ public class DeliveryController {
 
 
     @GetMapping("/test/{count}")
-    public ResponseEntity<String> testMethod(@Requestparam String  count) {
+    public ResponseEntity<String> testMethod(@PathVariable String  count) {
         return ResponseEntity.ok().body("Delivery-service:"+count);
     }
 
